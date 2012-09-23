@@ -1,7 +1,9 @@
-H:\Visual Studio 2010\Projects\AudioSlut\AudioSlut\bin\Debug\AudioSlut.exe
-H:\Visual Studio 2010\Projects\AudioSlut\AudioSlut\bin\Debug\AudioSlut.pdb
 H:\Visual Studio 2010\Projects\AudioSlut\AudioSlut\obj\x86\Debug\AudioSlut.Form1.resources
+H:\Visual Studio 2010\Projects\AudioSlut\AudioSlut\obj\x86\Debug\AudioSlut.AudioSlut.resources
 H:\Visual Studio 2010\Projects\AudioSlut\AudioSlut\obj\x86\Debug\AudioSlut.Properties.Resources.resources
 H:\Visual Studio 2010\Projects\AudioSlut\AudioSlut\obj\x86\Debug\AudioSlut.csproj.GenerateResource.Cache
+H:\Visual Studio 2010\Projects\AudioSlut\AudioSlut\bin\Debug\AudioSlut.exe.config
+H:\Visual Studio 2010\Projects\AudioSlut\AudioSlut\bin\Debug\AudioSlut.exe
+H:\Visual Studio 2010\Projects\AudioSlut\AudioSlut\bin\Debug\AudioSlut.pdb
 H:\Visual Studio 2010\Projects\AudioSlut\AudioSlut\obj\x86\Debug\AudioSlut.exe
 H:\Visual Studio 2010\Projects\AudioSlut\AudioSlut\obj\x86\Debug\AudioSlut.pdb
