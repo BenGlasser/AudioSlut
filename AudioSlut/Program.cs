@@ -3,12 +3,33 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Management;
 using System.Collections;
+using System.Diagnostics;
+using System.Runtime.InteropServices; 
+using System.ComponentModel;
+using System.Text;
+
 
 namespace AudioSlut
 {
     public class AudioSlut : Form
     {
+        private static Int32 METHOD_BUFFERED = 0;
+        private static Int32 FILE_ANY_ACCESS = 0;
+        private static Int32 FILE_DEVICE_HAL = 0x00000101;
+
+        private const Int32 ERROR_NOT_SUPPORTED = 0x32;
+        private const Int32 ERROR_INSUFFICIENT_BUFFER = 0x7A;
+
+        private static Int32 IOCTL_HAL_GET_DEVICEID =
+            ((FILE_DEVICE_HAL) << 16) | ((FILE_ANY_ACCESS) << 14)
+            | ((21) << 2) | (METHOD_BUFFERED);
+
+        [DllImport("coredll.dll", SetLastError = true)]
+        private static extern bool KernelIoControl(Int32 dwIoControlCode,
+            IntPtr lpInBuf, Int32 nInBufSize, byte[] lpOutBuf,
+            Int32 nOutBufSize, ref Int32 lpBytesReturned);
         public static ArrayList devices = new ArrayList();
+
         [STAThread]
         public static void Main()
         {
@@ -16,20 +37,24 @@ namespace AudioSlut
         }
         private NotifyIcon trayIcon;
         private ContextMenu trayMenu;
+        private MenuItem playbackMenu;
         public AudioSlut()
         {
-        
+
             // Create a simple tray menu .  
             trayMenu = new ContextMenu();
-            trayMenu.MenuItems.Add("Exit", OnExit);
-
-            MenuItem playbackMenu = new MenuItem("Playback Devices");
+            playbackMenu = new MenuItem("Playback Devices", selectPlayback);
             playbackMenu.MenuItems.AddRange(deviceMenu());
             trayMenu.MenuItems.Add(playbackMenu);
-        
-            // Create a tray icon. In this example we use a  
-            // standard system icon for simplicity, but you  
-            // can of course use your own custom icon too. 
+            for (int i = 0; i < playbackMenu.MenuItems.Count; ++i)
+            {
+                playbackMenu.MenuItems[i].Click += new EventHandler(selectPlayback);
+            }
+
+            trayMenu.MenuItems.Add("Exit", OnExit);
+
+
+            // Create a tray icon.  
             trayIcon = new NotifyIcon();
             trayIcon.Text = "AudioSlut";
             trayIcon.Icon = new Icon("../../Resources/speaker.ico", 40, 40);
@@ -42,6 +67,17 @@ namespace AudioSlut
             Visible = false; // Hide form window.           
             ShowInTaskbar = false; // Remove from taskbar. 
             base.OnLoad(e);
+        }
+        private void selectPlayback(object sender, EventArgs e)
+        {
+            MenuItem item = sender as MenuItem;
+            if (item != null)
+            {
+                int index = (item.MenuItems.IndexOf(item));
+                setDevice(index.ToString());
+                Console.WriteLine(index.ToString());
+            }
+
         }
         private void OnExit(object sender, EventArgs e)
         {
@@ -76,37 +112,30 @@ namespace AudioSlut
         }
         private void getDevices()
         {
-            ManagementObjectSearcher objSearcher = new ManagementObjectSearcher(
-                "SELECT * FROM Win32_SoundDevice");
-            ManagementObjectCollection objCollection = objSearcher.Get();
-            foreach (ManagementObject obj in objCollection)
-            {
-                foreach (PropertyData property in obj.Properties)
-                {
-                    Console.Out.WriteLine(String.Format("{0}:{1}", property.Name, property.Value));
-                    if (property.Name == "Name"){
-                        devices.Add(property.Value);
-                    }
-                }
-            }
+            devices = new ArrayList(Win32.GetSoundDevices());
         }
-        private MenuItem[] deviceMenu()
-        {
+        private MenuItem[] deviceMenu(){
             getDevices();
             int i = 0;
             MenuItem[] deviceMenu = new MenuItem[devices.Count];
-            foreach(String device in devices)
+            foreach (String device in devices)
             {
                 deviceMenu[i] = new MenuItem(device);
                 ++i;
             }
             return deviceMenu;
-
         }
-        private void setDevice()
+        private void setDevice(String newDeviceID)
         {
+            // Set newDeviceID here, by some means. A common scenario
+            // is to save the value using the registry so it can be toggled.
 
+            Process myProc = Process.Start(new ProcessStartInfo("EndPointController.exe", newDeviceID.ToString())
+            {
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
+            });
         }
     }
 }
-
